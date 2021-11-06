@@ -1,0 +1,114 @@
+# サンプルシステム8
+# TIlibの使用方法調査
+# 日経平均 スローストキャスティクスを見て、%SDが 80%以上になったらベアを買い、80%未満になったら売る、%SDが 20%未満になったらブルを買い、20%以上になったら売る
+require "TIlib"
+
+######################################################################
+# 定数定義
+######################################################################
+$C_SIGNAL_NONE      = 0
+$C_SIGNAL_OVER_80   = 1
+$C_SIGNAL_UNDER_80  = 2
+$C_SIGNAL_OVER_20   = 3
+$C_SIGNAL_UNDER_20  = 4
+
+
+######################################################################
+# グローバル変数定義
+######################################################################
+if $bull_stocks == null
+	$bull_stocks = 0
+end
+if $bear_stocks == null
+	$bear_stocks = 0
+end
+
+# ストキャスティクス・オブジェクトが無ければ生成を、あれば更新を行います
+if !$ST
+    $ST = {"1001"}Stoch_new(26, 3, 3)
+else
+    Stoch_next($ST)
+end
+
+######################################################################
+# サブルーチン定義
+######################################################################
+def Check_signal()
+    # 前日 %SD
+    last_sd = $ST[4]
+    # 当日 %SD
+    current_sd = Stoch_sd($ST)
+
+    if (last_sd==null) || (current_sd==null)
+        return
+    end
+
+    # Print("last_sd=" + last_sd)
+    # Print("current_sd=" + current_sd)
+    if      (last_sd > current_sd)
+        if      (current_sd < 80)&&(last_sd >= 80)
+            # 80%を割った
+            return $C_SIGNAL_UNDER_80
+        elsif   (current_sd < 20)&&(last_sd >= 20)
+            # 20%を割った
+            return $C_SIGNAL_UNDER_20
+        end
+    elsif   (last_sd < current_sd)
+        if      (current_sd>=80)&&(last_sd < 80)
+            # 80%を越えた
+            return $C_SIGNAL_OVER_80
+        elsif   (current_sd>=20)&&(last_sd < 20)
+            # 20%を越えた
+            return $C_SIGNAL_OVER_20
+        else
+            # do nothing
+        end
+    else
+        # do nothing.
+    end
+    return $C_SIGNAL_NONE
+end
+
+######################################################################
+# システムの main ルーチン
+######################################################################
+def Main()
+    # 日経平均前日終値でチェック
+    sig = Check_signal()
+
+    if      (sig == $C_SIGNAL_OVER_80)
+        # 80%越えたので、当日始値でベアを買う
+        if Code == "1357"
+            Buy(Open, 100)
+            $bear_stocks = $bear_stocks + 100
+        end
+    elsif   (sig == $C_SIGNAL_UNDER_80)
+        # 80%切ったので、当日始値でベアを売る
+        if Code == "1357"
+            Sell(Open, $bear_stocks)
+            $bear_stocks = 0
+        end
+    elsif   (sig == $C_SIGNAL_OVER_20)
+        # 20%越えたので、当日始値でブルを売る
+        if Code == "1570"
+            Sell(Open, $bull_stocks)
+            $bull_stocks = 0
+        end
+    elsif   (sig == $C_SIGNAL_UNDER_20)
+        # 20%切ったので、当日始値でブルを買う
+        if Code == "1570"
+            Buy(Open, 10)
+            $bull_stocks = $bull_stocks + 10
+        end
+    else
+        # do nothing.
+    end
+end
+
+# Entry Point
+Main()
+
+# else if でもなく elseif でもなく「 elsif 」。なにそれ。
+# 現在 ptsim が Code として割り当てている以外の銘柄を Buy/Sell しても、成績に加算されないので
+# システムを組むときは「 今見てる銘柄が〇〇だったとき、指標が××だったら、買う・買わない・売る・売らない 」という観点でプログラムを書く必要がある。
+# 作用素は 関数の暗黙隠れ引数みたいなもの。 面白い概念だと思う。 string型で指定した場合は 自動的に銘柄コードになり、int型で指定したときは自動的に日付をさすものになる。

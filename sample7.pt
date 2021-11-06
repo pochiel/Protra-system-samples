@@ -1,0 +1,65 @@
+# サンプルシステム7
+# 作用素の練習で、日経平均 Fiz-Buz
+
+def Is_Fiz()
+    # 文字列作用素で 銘柄を指定、 int型作用素で前日を指定
+    # 前日終値が 3の倍数？
+    last_close = {"1001"}{-1}Close
+    if last_close == null
+        return 0
+    end
+    return ( last_close % 3 == 0 )
+end
+
+def Is_Buz()
+    # 文字列作用素で 銘柄を指定、 int型作用素で前日を指定
+    # 前日終値が 5の倍数？
+    last_close = {"1001"}{-1}Close
+    if last_close == null
+        return 0
+    end
+    return ( last_close % 5 == 0 )
+end
+
+if ! $bull_stocks
+	$bull_stocks = 0
+end
+if ! $bear_stocks
+	$bear_stocks = 0
+end
+
+#Print(Code + ": " + Year + "/" + Month + "/" + Day + ", " + Open + "," + Close )
+
+# 日経平均前日終値でFiz-Buz
+if Is_Fiz() && Is_Buz()
+    # 3 と 5 の倍数だったら、当日始値で売る
+    #Print( "FizBuz! " + Code + ": " + Year + "/" + Month + "/" + Day + ", " + Open + "," + Close )
+    if Code == "1570"
+        Sell(Open, $bull_stocks)
+    elsif Code == "1357"
+        Sell(Open, $bear_stocks)
+    end
+    $bear_stocks = 0
+    $bull_stocks = 0
+elsif Is_Fiz()
+    # 3の倍数だったら 当日始値でブルを買う
+    # Print( "Fiz! " + Code + ": " + Year + "/" + Month + "/" + Day + ", " + Open + "," + Close )
+    if Code == "1570"
+        Buy(Open, 10)
+        $bull_stocks = $bull_stocks + 10
+    end
+elsif Is_Buz()
+    # 5の倍数だったら、当日始値でベアを買う
+    Print( "Buz! " + Code + ": " + Year + "/" + Month + "/" + Day + ", " + Open + "," + Close )
+    if Code == "1357"
+        Buy(Open, 100)
+        $bear_stocks = $bear_stocks + 100
+    end
+else
+    # なにもしない
+end
+
+# else if でもなく elseif でもなく「 elsif 」。なにそれ。
+# 現在 ptsim が Code として割り当てている以外の銘柄を Buy/Sell しても、成績に加算されないので
+# システムを組むときは「 今見てる銘柄が〇〇だったとき、指標が××だったら、買う・買わない・売る・売らない 」という観点でプログラムを書く必要がある。
+# 作用素は 関数の暗黙隠れ引数みたいなもの。 面白い概念だと思う。 string型で指定した場合は 自動的に銘柄コードになり、int型で指定したときは自動的に日付をさすものになる。

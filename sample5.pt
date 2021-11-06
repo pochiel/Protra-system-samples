@@ -1,0 +1,43 @@
+# サンプルシステム5
+# 変数を使った制御構文のテスト。
+# その日の高値から デクリメントしてゆき、安値になったらwhile文を抜ける
+
+i = High
+
+Print(Code + ": " + Year + "/" + Month + "/" + Day + ", " + High + "," + Low )
+
+while(i != Low)
+    i = i - 1
+end
+
+Print("step1 ok")
+
+i = High
+
+while(1)
+    if i==Low
+        break
+    end
+    i = i - 1
+end
+
+Print("step2 ok" + i)
+
+
+# 実行結果
+# 1357: 2015/9/4, 3405,3155
+# step1 ok
+# step2 ok3155
+# 1357: 2015/9/7, 3460,3250
+# step1 ok
+# step2 ok3250
+# 1357: 2015/9/8, 3475,3265
+# step1 ok
+# step2 ok3265
+# 1357: 2015/9/9, 3250,2950
+# step1 ok
+# step2 ok2950
+# 1357: 2015/9/10, 3200,3080
+# step1 ok
+# step2 ok3080
+# break文が書ける。 continue も書けるらしい。

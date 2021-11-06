@@ -1,0 +1,17 @@
+# サンプルシステム1
+# 銘柄と日付のぶんだけ、"Hello, World!"が表示される
+
+Print("Hello, World!")
+
+# 実行結果
+# Hello, World!
+# Hello, World!
+# Hello, World!
+# Hello, World!
+# Hello, World!
+# Hello, World!
+# Hello, World!
+# Hello, World!
+# Hello, World!
+# Hello, World!
+# Hello, World!
